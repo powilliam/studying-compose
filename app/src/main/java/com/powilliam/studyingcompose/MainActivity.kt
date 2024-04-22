@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.navigation.compose.rememberNavController
 import com.powilliam.studyingcompose.navigation.ApplicationNavHost
 import com.powilliam.studyingcompose.theming.ApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -101,6 +102,36 @@ import dagger.hilt.android.AndroidEntryPoint
  *       Text ->
  *
  * - Recompositions are triggered by any change to a State<T>
+ *
+ * Call Site is the term used to describe the location where the composable was called.
+ * It does affect its place in composition and in the tree-structure
+ *
+ * - The compiler has awareness about all composables
+ * during a recomposition, which implies that only necessary updates occur, avoiding
+ * waste of resources, such as battery and processing power.
+ *
+ * Greetings ->                                 [won't recompose] Greetings ->
+ *      Column ->           name is empty           [won't recompose] Column ->
+ *          Text ->         ------------>                                 Text (feedback) ->
+ *                                                      [won't recompose] Text ->
+ *
+ * - If the same composable is called multiple times in the same call site,
+ * the compiler will use its call order as an identifier. In short, any operation such
+ * adding a new item to the top, ordering or filtering will cause a mass recomposition.
+ *
+ * Like:
+ *
+ * Greetings ->                                                    [won't recompose] Greetings ->
+ *      Column ->           New content is added to the bottom         [won't recompose] Column ->
+ *          Content ->      ---------------------------------->           [won't recompose] Content ->
+ *          Content ->                                                    [won't recompose] Content ->
+ *                                                                               [new item] Content ->
+ *
+ *    Greetings ->                                                  [won't recompose] Greetings ->
+ *        Column ->           New content is added to the top           [won't recompose] Column ->
+ *            Content ->      ------------------------------->                    [new item] Content ->
+ *            Content ->                                                    [will recompose] Content ->
+ *                                                                          [will recompose] Content ->
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -109,9 +140,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge();
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
+            val controller = rememberNavController()
 
-            ApplicationTheme({ this }) {
-                ApplicationNavHost(windowSizeClass)
+            ApplicationTheme {
+                ApplicationNavHost(controller, windowSizeClass)
             }
         }
     }

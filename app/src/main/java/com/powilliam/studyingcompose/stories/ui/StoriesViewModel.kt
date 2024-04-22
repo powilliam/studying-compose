@@ -1,16 +1,15 @@
 package com.powilliam.studyingcompose.stories.ui
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.paging.cachedIn
 import com.powilliam.studyingcompose.stories.data.StoriesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class StoriesViewModel @Inject constructor(
-    private val stories: StoriesRepository
+    private val repository: StoriesRepository
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(StoriesUiState())
-    val uiState: StateFlow<StoriesUiState> = _uiState
+    val paging = repository.latestStories.cachedIn(viewModelScope)
 }

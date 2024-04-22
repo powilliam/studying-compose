@@ -9,6 +9,8 @@ interface HackerNewsService {
     @GET("{version}/search_by_date")
     suspend fun latest(
         @Path("version") version: String = "v1",
+        @Query("page") page: Int = 1,
+        @Query("hitsPerPage") perPage: Int = 20,
         @Query("tags") tags: String,
     ): Response<DataTransferObject>
 }

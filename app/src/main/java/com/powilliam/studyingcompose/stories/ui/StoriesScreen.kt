@@ -1,58 +1,89 @@
 package com.powilliam.studyingcompose.stories.ui
 
-import android.content.res.Configuration
-import androidx.compose.foundation.layout.Column
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import com.powilliam.studyingcompose.theming.ApplicationTheme
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.dp
+import androidx.paging.compose.LazyPagingItems
+import com.powilliam.studyingcompose.stories.data.Story
+import com.powilliam.studyingcompose.utils.isLoading
 
 private val modifier: Modifier = Modifier
 
-/**
- *  Compose is a Declarative UI Framework
- * for building native interfaces on Android.
- *
- * - As `declarative` implies, it's based on the `f(data) = ui` thing
- * which means that composable functions outputs interfaces from any given data
- *
- * - The `@Composable` annotation informs the compiler that the annotated function
- * will convert data into ui
- *
- * - Composable functions don't return anything. That's because they are meant to describe
- * a interface hierarchy instead of instructing how to construct it
- *
- * - Composable functions should be fast to avoid junk as frames passes
- *
- * - Recomposition is the process of calling composable functions
- * again when any given data changes
- *
- * - Recomposition skips as many composables and lambdas as possible,
- * `smart recomposition` as they describe in the docs, so composables
- * can be called again at every frame without suffering a complete redrawn.
- *
- * Keep composables free from Side Effects
- */
 @Composable
-fun StoriesScreen(storiesState: StoriesUiState = StoriesUiState()) {
-    Scaffold { paddingValues ->
-        Column(modifier = modifier.padding(paddingValues)) {
-            Text(text = "Greetings from StoriesScreen")
+fun StoriesScreen(paging: LazyPagingItems<Story>) {
+    val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
+    val isRefreshing by paging.isLoading { it.refresh }
+    val isAppending by paging.isLoading { it.append }
+
+    Scaffold(
+        modifier = modifier.nestedScroll(behavior.nestedScrollConnection),
+        topBar = {
+            LargeTopAppBar(
+                scrollBehavior = behavior,
+                navigationIcon = {
+                    AnimatedVisibility(isRefreshing) {
+                        Text(
+                            text = "Loading...",
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = modifier.padding(start = 8.dp)
+                        )
+                    }
+                },
+                title = {
+                    Text(text = "Latest Stories")
+                },
+            )
         }
-    }
-}
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = modifier
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(count = paging.itemCount) { index ->
+                val story = paging[index]
 
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun StoriesScreenPreview() {
-    val context = LocalContext.current
+                key(story?.id) {
+                    Card(
+                        modifier = modifier.fillMaxWidth(),
+                        colors = CardDefaults
+                            .outlinedCardColors()
+                    ) {
+                        Text(text = "${story?.title}")
+                    }
+                }
+            }
 
-    ApplicationTheme({ context }) {
-        StoriesScreen()
+            item {
+                AnimatedVisibility(
+                    isAppending,
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .wrapContentWidth(Alignment.CenterHorizontally)
+                        .padding(vertical = 16.dp)
+                ) {
+                    Text(text = "Loading...", style = MaterialTheme.typography.labelSmall)
+                }
+            }
+        }
     }
 }

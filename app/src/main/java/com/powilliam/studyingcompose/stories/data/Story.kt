@@ -1,7 +1,9 @@
 package com.powilliam.studyingcompose.stories.data
 
+import androidx.compose.runtime.Stable
 import com.google.gson.annotations.SerializedName
 
+@Stable
 data class Story(
     val title: String,
     val author: String,

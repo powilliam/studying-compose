@@ -2,20 +2,34 @@ package com.powilliam.studyingcompose.navigation
 
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.powilliam.studyingcompose.stories.ui.StoriesScreen
+import com.powilliam.studyingcompose.stories.ui.StoriesViewModel
 
 @Composable
 fun ApplicationNavHost(
+    controller: NavHostController,
     windowSizeClass: WindowSizeClass,
-    controller: NavHostController = rememberNavController()
 ) {
     NavHost(navController = controller, startDestination = Destination.Stories.route) {
         composable(Destination.Stories.route, Destination.Stories.arguments) {
-            StoriesScreen()
+            val storiesViewModel = hiltViewModel<StoriesViewModel>()
+            /**
+             *  Compose only triggers recomposition for value changes when the state is a State<T>.
+             * A conversion is needed to work with other observable data structure.
+             *
+             *      Flows -> collectAsStateWithLifecycle() [Android Only] or collectAsState() [Platform Agnostic]
+             *      LiveData -> observeAsState()
+             *      RXJava2 or RXJava3 -> subscribeAsState()
+             */
+            val paging = storiesViewModel.paging.collectAsLazyPagingItems()
+
+            StoriesScreen(paging)
         }
     }
 }

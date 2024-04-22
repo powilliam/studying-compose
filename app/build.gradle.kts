@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.powilliam.styingcompose"
+    namespace = "com.powilliam.studyingcompose"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.powilliam.styingcompose"
+        applicationId = "com.powilliam.studyingcompose"
         minSdk = 27
         targetSdk = 34
         versionCode = 1
@@ -62,6 +62,7 @@ dependencies {
     implementation("androidx.compose.material3:material3-window-size-class")
     implementation("androidx.activity:activity-compose:1.9.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
@@ -84,6 +85,10 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+
+    // Paging
+    implementation("androidx.paging:paging-runtime-ktx:3.2.1")
+    implementation("androidx.paging:paging-compose:3.2.1")
 
     // Tests
     testImplementation("junit:junit:4.13.2")
