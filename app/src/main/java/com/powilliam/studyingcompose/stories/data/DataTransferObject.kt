@@ -8,5 +8,6 @@ data class DataTransferObject(
     @SerializedName("hitsPerPage")
     val perPage: Int,
     @SerializedName("nbPages")
-    val pages: Int
+    val pages: Int,
+    val page: Int,
 )
