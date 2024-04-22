@@ -6,7 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.powilliam.studyingcompose.stories.StoriesScreen
+import com.powilliam.studyingcompose.stories.ui.StoriesScreen
 
 @Composable
 fun ApplicationNavHost(

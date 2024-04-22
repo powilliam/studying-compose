@@ -1,6 +1,7 @@
-package com.powilliam.studyingcompose.stories
+package com.powilliam.studyingcompose.stories.ui
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -37,9 +38,11 @@ private val modifier: Modifier = Modifier
  * Keep composables free from Side Effects
  */
 @Composable
-fun StoriesScreen(name: String = "World") {
+fun StoriesScreen(storiesState: StoriesUiState = StoriesUiState()) {
     Scaffold { paddingValues ->
-        Text(text = "Hello, $name!", modifier = modifier.padding(paddingValues))
+        Column(modifier = modifier.padding(paddingValues)) {
+            Text(text = "Greetings from StoriesScreen")
+        }
     }
 }
 
@@ -50,6 +53,6 @@ private fun StoriesScreenPreview() {
     val context = LocalContext.current
 
     ApplicationTheme({ context }) {
-        StoriesScreen(name = "William")
+        StoriesScreen()
     }
 }
