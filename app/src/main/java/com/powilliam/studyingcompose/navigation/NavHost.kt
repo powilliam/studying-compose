@@ -6,16 +6,16 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.powilliam.studyingcompose.instructions.InstructionsScreen
+import com.powilliam.studyingcompose.stories.StoriesScreen
 
 @Composable
 fun ApplicationNavHost(
     windowSizeClass: WindowSizeClass,
     controller: NavHostController = rememberNavController()
 ) {
-    NavHost(navController = controller, startDestination = Destination.Instructions.route) {
-        composable(Destination.Instructions.route, Destination.Instructions.arguments) {
-            InstructionsScreen()
+    NavHost(navController = controller, startDestination = Destination.Stories.route) {
+        composable(Destination.Stories.route, Destination.Stories.arguments) {
+            StoriesScreen()
         }
     }
 }

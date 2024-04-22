@@ -6,5 +6,5 @@ sealed class Destination(
     val route: String,
     val arguments: List<NamedNavArgument> = emptyList()
 ) {
-    object Instructions : Destination("instructions")
+    object Stories : Destination("stories")
 }
