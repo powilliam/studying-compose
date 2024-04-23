@@ -1,6 +1,6 @@
 package com.powilliam.studyingcompose.stories.data
 
-import android.util.Log
+import androidx.compose.ui.util.fastMap
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
@@ -14,11 +14,12 @@ data class StoriesRemoteMediatorConfig(val topic: String, val cacheMaxAgeInHours
 
 @OptIn(ExperimentalPagingApi::class)
 class StoriesRemoteMediator(
+    private val topics: TopicsDataAccessObject,
     private val stories: StoriesDataAccessObject,
     private val pagingKeys: StoryPagingKeyDataAccessObject,
     private val config: StoriesRemoteMediatorConfig,
     private val dataSource: suspend (Int) -> DataTransferObject?
-) : RemoteMediator<Int, Story>() {
+) : RemoteMediator<Int, TopicWithStories>() {
     override suspend fun initialize(): InitializeAction {
         val latestPagingKey = withContext(Dispatchers.IO) {
             pagingKeys.latest(config.topic)
@@ -28,19 +29,14 @@ class StoriesRemoteMediator(
             .plus(Duration.ofHours(config.cacheMaxAgeInHours))
 
         if (Instant.now().isAfter(maxAge)) {
-            Log.d("StoriesRemoteMediator:initialize", "max age reached")
             return InitializeAction.LAUNCH_INITIAL_REFRESH
         }
-
-        Log.d("StoriesRemoteMediator:initialize", "max age not reached")
 
         return InitializeAction.SKIP_INITIAL_REFRESH
     }
 
-    override suspend fun load(loadType: LoadType, state: PagingState<Int, Story>): MediatorResult {
+    override suspend fun load(loadType: LoadType, state: PagingState<Int, TopicWithStories>): MediatorResult {
         return try {
-            Log.d("StoriesRemoteMediator:load", "$loadType")
-
             val page = when(loadType) {
                 LoadType.REFRESH -> null
                 LoadType.PREPEND -> {
@@ -57,12 +53,13 @@ class StoriesRemoteMediator(
 
             val data = dataSource(page ?: 1)
 
-            Log.d("StoriesRemoteMediator:load", "page: ${data?.page}, pages: ${data?.pages}")
-
             withContext(Dispatchers.IO) {
                 if (loadType == LoadType.REFRESH) {
-                    pagingKeys.nuke(config.topic)
-                    stories.nuke()
+                    topics.topicWithStories(config.topic)?.let { topicWithStories ->
+                        stories.nukeTheseNuts(topicWithStories.stories)
+                        topics.nuke(topicWithStories.topic.name)
+                        pagingKeys.nuke(config.topic)
+                    }
                 }
 
                 pagingKeys.upsert(
@@ -72,15 +69,18 @@ class StoriesRemoteMediator(
                         topic = config.topic,
                     )
                 )
-                stories.upsert(data?.stories ?: emptyList())
-            }
 
-            Log.d("StoriesRemoteMediator:load", "${data?.page == data?.pages}")
+                val everything = (data?.stories ?: emptyList())
+                val crossRefs = everything.fastMap { story ->
+                    TopicStoryCrossRef(topicName = config.topic, storyId = story.id)
+                }
+
+                stories.upsert(everything)
+                topics.upsert(topic = Topic(config.topic), topicStoryCrossRefs = crossRefs)
+            }
 
             MediatorResult.Success(endOfPaginationReached = data?.stories?.isEmpty() ?: false)
         } catch (exception: Exception) {
-            Log.d("StoriesRemoteMediator:load:catch", "$exception")
-
             MediatorResult.Error(exception)
         }
     }

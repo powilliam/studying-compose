@@ -7,8 +7,9 @@ import com.powilliam.studyingcompose.stories.data.StoriesDataAccessObject
 import com.powilliam.studyingcompose.stories.data.StoriesRemoteDataSource
 import com.powilliam.studyingcompose.stories.data.StoriesRemoteMediator
 import com.powilliam.studyingcompose.stories.data.StoriesRemoteMediatorConfig
-import com.powilliam.studyingcompose.stories.data.Story
 import com.powilliam.studyingcompose.stories.data.StoryPagingKeyDataAccessObject
+import com.powilliam.studyingcompose.stories.data.TopicWithStories
+import com.powilliam.studyingcompose.stories.data.TopicsDataAccessObject
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,19 +29,20 @@ object PagingModule {
     @Singleton
     @Provides
     fun provideLatestStoriesPager(
+        topics: TopicsDataAccessObject,
         stories: StoriesDataAccessObject,
         pagingKey: StoryPagingKeyDataAccessObject,
         dataSource: StoriesRemoteDataSource,
-    ): Pager<Int, Story> {
+    ): Pager<Int, TopicWithStories> {
         val config = StoriesRemoteMediatorConfig(topic = "latest_stories", cacheMaxAgeInHours = 6)
 
         return Pager(
             config = PagingConfig(pageSize = 20),
-            remoteMediator = StoriesRemoteMediator(stories, pagingKey, config) { page ->
+            remoteMediator = StoriesRemoteMediator(topics, stories, pagingKey, config) { page ->
                 dataSource.latest(tags = "story", page = page)
             }
         ) {
-            stories.pagingSource()
+            topics.pagingSource(name = "latest_stories")
         }
     }
 }

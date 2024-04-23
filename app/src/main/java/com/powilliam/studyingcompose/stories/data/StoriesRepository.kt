@@ -7,12 +7,12 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 interface StoriesRepository {
-    val latestStories: Flow<PagingData<Story>>
+    val latestStories: Flow<PagingData<TopicWithStories>>
 }
 
 class StoriesRepositoryImpl @Inject constructor(
     @LatestStoriesPager
-    private val pager: Pager<Int, Story>
+    private val pager: Pager<Int, TopicWithStories>
 ) : StoriesRepository {
     override val latestStories = pager.flow
 }

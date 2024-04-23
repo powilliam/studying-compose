@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.powilliam.studyingcompose.database.AppDatabase
 import com.powilliam.studyingcompose.stories.data.StoriesDataAccessObject
 import com.powilliam.studyingcompose.stories.data.StoryPagingKeyDataAccessObject
+import com.powilliam.studyingcompose.stories.data.TopicsDataAccessObject
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,4 +31,9 @@ object DatabaseModule {
     @Provides
     fun provideStoryPagingKeyDataAccessObject(database: AppDatabase): StoryPagingKeyDataAccessObject =
         database.storyPagingKeys()
+
+    @Singleton
+    @Provides
+    fun provideTopicsDataAccessObject(database: AppDatabase): TopicsDataAccessObject =
+        database.topics()
 }
