@@ -10,19 +10,22 @@ import kotlinx.coroutines.withContext
 import java.time.Duration
 import java.time.Instant
 
+data class StoriesRemoteMediatorConfig(val topic: String, val cacheMaxAgeInHours: Long)
+
 @OptIn(ExperimentalPagingApi::class)
 class StoriesRemoteMediator(
     private val stories: StoriesDataAccessObject,
     private val pagingKeys: StoryPagingKeyDataAccessObject,
+    private val config: StoriesRemoteMediatorConfig,
     private val dataSource: suspend (Int) -> DataTransferObject?
 ) : RemoteMediator<Int, Story>() {
     override suspend fun initialize(): InitializeAction {
         val latestPagingKey = withContext(Dispatchers.IO) {
-            pagingKeys.latest()
+            pagingKeys.latest(config.topic)
         } ?: return InitializeAction.LAUNCH_INITIAL_REFRESH
 
         val maxAge = Instant.ofEpochMilli(latestPagingKey.createdAt)
-            .plus(Duration.ofHours(6))
+            .plus(Duration.ofHours(config.cacheMaxAgeInHours))
 
         if (Instant.now().isAfter(maxAge)) {
             Log.d("StoriesRemoteMediator:initialize", "max age reached")
@@ -45,7 +48,7 @@ class StoriesRemoteMediator(
                 }
                 LoadType.APPEND -> {
                     val latestPagingKey = withContext(Dispatchers.IO) {
-                        pagingKeys.latest()
+                        pagingKeys.latest(config.topic)
                     }
 
                     latestPagingKey?.nextKey
@@ -58,11 +61,17 @@ class StoriesRemoteMediator(
 
             withContext(Dispatchers.IO) {
                 if (loadType == LoadType.REFRESH) {
-                    pagingKeys.nuke()
+                    pagingKeys.nuke(config.topic)
                     stories.nuke()
                 }
 
-                pagingKeys.upsert(StoryPagingKey(prevKey = page ?: 1, nextKey = (data?.page ?: 1) + 1))
+                pagingKeys.upsert(
+                    StoryPagingKey(
+                        prevKey = page ?: 1,
+                        nextKey = (data?.page ?: 1) + 1,
+                        topic = config.topic,
+                    )
+                )
                 stories.upsert(data?.stories ?: emptyList())
             }
 

@@ -6,6 +6,7 @@ import androidx.paging.PagingConfig
 import com.powilliam.studyingcompose.stories.data.StoriesDataAccessObject
 import com.powilliam.studyingcompose.stories.data.StoriesRemoteDataSource
 import com.powilliam.studyingcompose.stories.data.StoriesRemoteMediator
+import com.powilliam.studyingcompose.stories.data.StoriesRemoteMediatorConfig
 import com.powilliam.studyingcompose.stories.data.Story
 import com.powilliam.studyingcompose.stories.data.StoryPagingKeyDataAccessObject
 import dagger.Module
@@ -30,12 +31,16 @@ object PagingModule {
         stories: StoriesDataAccessObject,
         pagingKey: StoryPagingKeyDataAccessObject,
         dataSource: StoriesRemoteDataSource,
-    ): Pager<Int, Story> = Pager(
-        config = PagingConfig(pageSize = 20),
-        remoteMediator = StoriesRemoteMediator(stories, pagingKey) { page ->
-            dataSource.latest(tags = "story", page = page)
+    ): Pager<Int, Story> {
+        val config = StoriesRemoteMediatorConfig(topic = "latest_stories", cacheMaxAgeInHours = 6)
+
+        return Pager(
+            config = PagingConfig(pageSize = 20),
+            remoteMediator = StoriesRemoteMediator(stories, pagingKey, config) { page ->
+                dataSource.latest(tags = "story", page = page)
+            }
+        ) {
+            stories.pagingSource()
         }
-    ) {
-        stories.pagingSource()
     }
 }

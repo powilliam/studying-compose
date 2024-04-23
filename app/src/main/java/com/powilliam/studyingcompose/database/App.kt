@@ -7,7 +7,7 @@ import com.powilliam.studyingcompose.stories.data.Story
 import com.powilliam.studyingcompose.stories.data.StoryPagingKey
 import com.powilliam.studyingcompose.stories.data.StoryPagingKeyDataAccessObject
 
-@Database(entities = [Story::class, StoryPagingKey::class], version = 2)
+@Database(entities = [Story::class, StoryPagingKey::class], version = 3)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun stories(): StoriesDataAccessObject
 

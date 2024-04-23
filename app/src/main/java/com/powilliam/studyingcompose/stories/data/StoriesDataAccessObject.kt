@@ -8,7 +8,7 @@ import androidx.room.Query
 
 @Dao
 interface StoriesDataAccessObject {
-    @Query("SELECT * FROM stories")
+    @Query("SELECT * FROM stories ORDER BY updatedAt DESC")
     fun pagingSource(): PagingSource<Int, Story>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

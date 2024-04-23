@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class StoryPagingKey(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val topic: String,
     val prevKey: Int? = null,
     val nextKey: Int? = null,
     val createdAt: Long = System.currentTimeMillis()
