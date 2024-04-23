@@ -3,9 +3,6 @@ package com.powilliam.studyingcompose.di
 import android.content.Context
 import androidx.room.Room
 import com.powilliam.studyingcompose.database.AppDatabase
-import com.powilliam.studyingcompose.stories.data.StoriesDataAccessObject
-import com.powilliam.studyingcompose.stories.data.StoryPagingKeyDataAccessObject
-import com.powilliam.studyingcompose.stories.data.TopicsDataAccessObject
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,19 +18,4 @@ object DatabaseModule {
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, "com.powilliam.studyingcompose")
             .build()
-
-    @Singleton
-    @Provides
-    fun provideStoriesDataAccessObject(database: AppDatabase): StoriesDataAccessObject =
-        database.stories()
-
-    @Singleton
-    @Provides
-    fun provideStoryPagingKeyDataAccessObject(database: AppDatabase): StoryPagingKeyDataAccessObject =
-        database.storyPagingKeys()
-
-    @Singleton
-    @Provides
-    fun provideTopicsDataAccessObject(database: AppDatabase): TopicsDataAccessObject =
-        database.topics()
 }
