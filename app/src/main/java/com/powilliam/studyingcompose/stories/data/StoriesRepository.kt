@@ -1,8 +1,8 @@
 package com.powilliam.studyingcompose.stories.data
 
 import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.powilliam.studyingcompose.stories.di.LatestStoriesPager
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -11,9 +11,8 @@ interface StoriesRepository {
 }
 
 class StoriesRepositoryImpl @Inject constructor(
-    private val dataSource: StoriesRemoteDataSource
+    @LatestStoriesPager
+    private val pager: Pager<Int, Story>
 ) : StoriesRepository {
-    override val latestStories = Pager(PagingConfig(pageSize = 20)) {
-        StoriesPagingSource { dataSource.latest(tags = "story", page = it) }
-    }.flow
+    override val latestStories = pager.flow
 }
