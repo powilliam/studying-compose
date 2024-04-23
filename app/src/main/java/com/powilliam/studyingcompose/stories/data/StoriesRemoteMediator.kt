@@ -9,7 +9,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Duration
 import java.time.Instant
-import java.time.temporal.TemporalAmount
 
 @OptIn(ExperimentalPagingApi::class)
 class StoriesRemoteMediator(
