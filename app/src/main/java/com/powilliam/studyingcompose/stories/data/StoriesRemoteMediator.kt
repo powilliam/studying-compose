@@ -7,6 +7,9 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.Duration
+import java.time.Instant
+import java.time.temporal.TemporalAmount
 
 @OptIn(ExperimentalPagingApi::class)
 class StoriesRemoteMediator(
@@ -14,11 +17,27 @@ class StoriesRemoteMediator(
     private val pagingKeys: StoryPagingKeyDataAccessObject,
     private val dataSource: suspend (Int) -> DataTransferObject?
 ) : RemoteMediator<Int, Story>() {
-    override suspend fun initialize() = InitializeAction.SKIP_INITIAL_REFRESH
+    override suspend fun initialize(): InitializeAction {
+        val latestPagingKey = withContext(Dispatchers.IO) {
+            pagingKeys.latest()
+        } ?: return InitializeAction.LAUNCH_INITIAL_REFRESH
+
+        val maxAge = Instant.ofEpochMilli(latestPagingKey.createdAt)
+            .plus(Duration.ofHours(6))
+
+        if (Instant.now().isAfter(maxAge)) {
+            Log.d("StoriesRemoteMediator:initialize", "max age reached")
+            return InitializeAction.LAUNCH_INITIAL_REFRESH
+        }
+
+        Log.d("StoriesRemoteMediator:initialize", "max age not reached")
+
+        return InitializeAction.SKIP_INITIAL_REFRESH
+    }
 
     override suspend fun load(loadType: LoadType, state: PagingState<Int, Story>): MediatorResult {
         return try {
-            Log.d("StoriesRemoteMediator:load", "$loadType, $state")
+            Log.d("StoriesRemoteMediator:load", "$loadType")
 
             val page = when(loadType) {
                 LoadType.REFRESH -> null
