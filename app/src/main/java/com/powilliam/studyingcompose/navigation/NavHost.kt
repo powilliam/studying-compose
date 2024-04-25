@@ -6,10 +6,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.powilliam.studyingcompose.stories.ui.StoriesScreen
 import com.powilliam.studyingcompose.stories.ui.StoriesViewModel
+import com.powilliam.studyingcompose.utils.collectItemSnapshotListWithLifecycle
 
 @Composable
 fun ApplicationNavHost(
@@ -27,9 +26,9 @@ fun ApplicationNavHost(
              *      LiveData -> observeAsState()
              *      RXJava2 or RXJava3 -> subscribeAsState()
              */
-            val paging = storiesViewModel.paging.collectAsLazyPagingItems()
+            val (snapshot, loadStates) = storiesViewModel.paging.collectItemSnapshotListWithLifecycle()
 
-            StoriesScreen(paging)
+            StoriesScreen(snapshot, loadStates)
         }
     }
 }
