@@ -1,5 +1,6 @@
 package com.powilliam.studyingcompose.stories.ui
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,6 +23,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import com.powilliam.studyingcompose.stories.data.TopicWithStories
+import com.powilliam.studyingcompose.utils.LaunchOnLifecycle
 import com.powilliam.studyingcompose.utils.isLoading
 
 private val modifier: Modifier = Modifier
@@ -32,6 +34,10 @@ fun StoriesScreen(paging: LazyPagingItems<TopicWithStories>) {
 
     val isRefreshing by paging.isLoading { it.refresh }
     val isAppending by paging.isLoading { it.append }
+
+    LaunchOnLifecycle { _, event ->
+        Log.d("StoriesScreen:LaunchOnLifecycle", "$event")
+    }
 
     Scaffold(
         modifier = modifier.nestedScroll(behavior.nestedScrollConnection),
